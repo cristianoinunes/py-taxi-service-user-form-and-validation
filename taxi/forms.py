@@ -2,14 +2,13 @@ import re
 
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 
-
-Driver = get_user_model()
+User = get_user_model()
 
 
 def validate_license_number(value: str) -> None:
-
     if not re.fullmatch(r"[A-Z]{3}[0-9]{5}", value):
         raise ValidationError(
             "License number must contain 3 uppercase letters "
@@ -17,19 +16,17 @@ def validate_license_number(value: str) -> None:
         )
 
 
-class DriverCreateForm(forms.ModelForm):
-    class Meta:
-        model = Driver
+class DriverCreateForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = User
         fields = (
             "username",
-            "password",
             "first_name",
             "last_name",
             "license_number",
+            "password1",
+            "password2",
         )
-        widgets = {
-            "password": forms.PasswordInput(),
-        }
 
     def clean_license_number(self):
         license_number = self.cleaned_data["license_number"]
@@ -39,7 +36,7 @@ class DriverCreateForm(forms.ModelForm):
 
 class DriverLicenseUpdateForm(forms.ModelForm):
     class Meta:
-        model = Driver
+        model = User
         fields = ("license_number",)
 
     def clean_license_number(self):
